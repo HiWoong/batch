@@ -13,6 +13,10 @@ public class BatchService {
 
     private final BatchRepository batchRepository;
 
+    /**
+     * 배치 정보 저장
+     * @param batchInfo
+     */
     public void save(BatchInfo batchInfo){
         batchRepository.save(batchInfo);
     }

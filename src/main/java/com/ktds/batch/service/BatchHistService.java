@@ -21,10 +21,20 @@ public class BatchHistService {
         batchHistRepository.save(batchHistInfo);
     }
 
+    /**
+     * 실행 클래스 이름과 상태로 배치 이력 조회
+     * @param batchId
+     * @param sttus
+     * @return
+     */
     public BatchHistInfo findByJobClassNmAndSttus(String batchId, String sttus) {
         return batchHistRepository.findByJobClassNmAndSttus(batchId, sttus);
     }
 
+    /**
+     * 배치 이력 수정
+     * @param batchHistInfo
+     */
     public void updateBatchHist(BatchHistInfo batchHistInfo) {
         batchHistRepository.save(batchHistInfo);
     }
