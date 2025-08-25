@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.ktds.batch.util.ScheduledCron;
 
-@ScheduledCron("5/15 * * * * ?")
+@ScheduledCron("30 * * * * ?")
 @Slf4j
 public class TestJob2 implements Job {
     @Override
