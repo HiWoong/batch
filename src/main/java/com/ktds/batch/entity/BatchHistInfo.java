@@ -28,7 +28,6 @@ public class BatchHistInfo {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id; // ID
-
     private String jobClassNm; // 실행 클래스 이름
     private LocalDateTime executionTime; // 실행 시간
     private String sttus; // 상태
