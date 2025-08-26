@@ -58,13 +58,12 @@ public class QuartzConfig {
                         scheduler.scheduleJob(jobDetail, trigger);
 
                         BatchInfo batchInfo = new BatchInfo();
-                        batchInfo.setNm(jobName + "Batch").setJobClassNm(jobName).setTriggerNm(jobName + "Trigger").setSttus(BatchSttus.AVAILABLE.getCode()).setCronExpression(cron).setContent(
-                            "log.info(\"[Job] 실행 시간: {}\", LocalDateTime.now());\n"
-                            + "        try {\n"
-                            + "            Thread.sleep(5000);\n"
-                            + "        } catch (InterruptedException e) {\n"
-                            + "            throw new JobExecutionException(e);\n"
-                            + "        }");
+                        batchInfo.setNm(jobName + "[Batch]")
+                            .setJobClassNm(jobName)
+                            .setTriggerNm(jobName + "[Trigger]")
+                            .setSttus(BatchSttus.AVAILABLE.getCode())
+                            .setCronExpression(cron)
+                            .setContent(jobName + "[Code]");
                         batchService.registerBatch(batchInfo);
 
                         System.out.printf(">>> Job 등록 완료: %s (%s)%n", jobName, cron);
