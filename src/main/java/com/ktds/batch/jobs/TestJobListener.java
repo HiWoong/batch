@@ -50,16 +50,15 @@ public class TestJobListener implements JobListener {
     public void jobWasExecuted(JobExecutionContext context, JobExecutionException e) {
         log.info(">>> [{}] 종료 시간: {}", context.getJobDetail().getKey(), LocalDateTime.now());
 
-        BatchHistInfo batchHistInfo = batchHistService.findByJobClassNmAndSttus(context.getJobDetail().getKey().getName(), TriggerSttus.START.getCode());
+        BatchHistInfo batchHistInfo = new BatchHistInfo();
+        batchHistInfo.setJobClassNm(context.getJobDetail().getKey().getName()).setExecutionTime(LocalDateTime.now());
         if (e != null) {
-            batchHistInfo.setExecutionTime(LocalDateTime.now()).setSttus(TriggerSttus.ERROR.getCode()).setDescription(
-                TriggerSttus.ERROR.getDescription());
+            batchHistInfo.setSttus(TriggerSttus.ERROR.getCode()).setDescription(TriggerSttus.ERROR.getDescription());
             log.info(">>> 에러 발생: {}", e.getMessage());
         } else {
-            batchHistInfo.setExecutionTime(LocalDateTime.now()).setSttus(TriggerSttus.END.getCode()).setDescription(
-                TriggerSttus.END.getDescription());
+            batchHistInfo.setSttus(TriggerSttus.END.getCode()).setDescription(TriggerSttus.END.getDescription());
             log.info(">>> 정상 종료: {}", context.getJobDetail().getKey());
         }
-        batchHistService.updateBatchHist(batchHistInfo);
+        batchHistService.updateBatchHist(batchHistInfo, TriggerSttus.START.getCode());
     }
 }

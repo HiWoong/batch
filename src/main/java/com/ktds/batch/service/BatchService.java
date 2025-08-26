@@ -1,6 +1,7 @@
 package com.ktds.batch.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ktds.batch.entity.BatchInfo;
 import com.ktds.batch.repository.BatchRepository;
@@ -17,7 +18,8 @@ public class BatchService {
      * 배치 정보 저장
      * @param batchInfo
      */
-    public void save(BatchInfo batchInfo){
+    @Transactional
+    public void registerBatch(BatchInfo batchInfo){
         batchRepository.save(batchInfo);
     }
 

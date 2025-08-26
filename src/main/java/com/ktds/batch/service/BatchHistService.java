@@ -1,6 +1,9 @@
 package com.ktds.batch.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ktds.batch.entity.BatchHistInfo;
 import com.ktds.batch.repository.BatchHistRepository;
@@ -17,8 +20,23 @@ public class BatchHistService {
      * 배치 이력 정보 저장
      * @param batchHistInfo
      */
-    public void registerBatchHist(BatchHistInfo batchHistInfo) {
-        batchHistRepository.save(batchHistInfo);
+    @Transactional
+    public BatchHistInfo registerBatchHist(BatchHistInfo batchHistInfo) {
+        return batchHistRepository.save(batchHistInfo);
+    }
+
+    /**
+     * 배치 이력 정보 수정
+     * @param batchHistInfo
+     */
+    @Transactional
+    public void updateBatchHist(BatchHistInfo batchHistInfo, String sttusCode) {
+        BatchHistInfo batchHist = this.findByJobClassNmAndSttus(batchHistInfo.getJobClassNm(),
+            sttusCode);
+        batchHist.setExecutionTime(batchHistInfo.getExecutionTime())
+            .setSttus(batchHistInfo.getSttus())
+            .setDescription(batchHistInfo.getDescription());
+        this.registerBatchHist(batchHist);
     }
 
     /**
@@ -27,16 +45,13 @@ public class BatchHistService {
      * @param sttus
      * @return
      */
-    public BatchHistInfo findByJobClassNmAndSttus(String batchId, String sttus) {
-        return batchHistRepository.findByJobClassNmAndSttus(batchId, sttus);
-    }
-
-    /**
-     * 배치 이력 수정
-     * @param batchHistInfo
-     */
-    public void updateBatchHist(BatchHistInfo batchHistInfo) {
-        batchHistRepository.save(batchHistInfo);
+    @Transactional(readOnly = true)
+    protected BatchHistInfo findByJobClassNmAndSttus(String batchId, String sttus) {
+        return batchHistRepository.findByJobClassNmAndSttus(batchId, sttus)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "BatchHistInfo findByJobClassNmAndSttus"
+            ));
     }
 
 }
