@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-public class QuartzConfig {
+public class SchedulerConfig {
 
     private final Scheduler scheduler;
     private final BatchService batchService;
