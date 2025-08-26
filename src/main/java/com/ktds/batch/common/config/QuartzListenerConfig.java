@@ -1,4 +1,4 @@
-package com.ktds.batch.config;
+package com.ktds.batch.common.config;
 
 import org.quartz.Scheduler;
 import org.springframework.context.annotation.Configuration;

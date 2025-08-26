@@ -1,4 +1,4 @@
-package com.ktds.batch.config;
+package com.ktds.batch.common.config;
 
 import java.util.Set;
 
@@ -65,7 +65,7 @@ public class QuartzConfig {
                             + "        } catch (InterruptedException e) {\n"
                             + "            throw new JobExecutionException(e);\n"
                             + "        }");
-                        batchService.save(batchInfo);
+                        batchService.registerBatch(batchInfo);
 
                         System.out.printf(">>> Job 등록 완료: %s (%s)%n", jobName, cron);
                     }

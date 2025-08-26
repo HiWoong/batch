@@ -2,6 +2,7 @@ package com.ktds.batch.jobs;
 
 import java.time.LocalDateTime;
 
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -12,6 +13,7 @@ import com.ktds.batch.util.ScheduledCron;
 
 @ScheduledCron("0 * * * * ?")
 @Slf4j
+@DisallowConcurrentExecution
 public class TestJob1 implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
