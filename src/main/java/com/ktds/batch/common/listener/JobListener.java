@@ -1,10 +1,9 @@
-package com.ktds.batch.jobs;
+package com.ktds.batch.common.listener;
 
 import java.time.LocalDateTime;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.JobListener;
 import org.springframework.stereotype.Component;
 
 import com.ktds.batch.entity.BatchHistInfo;
@@ -17,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class TestJobListener implements JobListener {
+public class JobListener implements org.quartz.JobListener {
 
     private final BatchHistService batchHistService;
 

@@ -3,7 +3,8 @@ package com.ktds.batch.common.config;
 import org.quartz.Scheduler;
 import org.springframework.context.annotation.Configuration;
 
-import com.ktds.batch.jobs.TestJobListener;
+import com.ktds.batch.common.listener.SchedulerListener;
+import com.ktds.batch.common.listener.JobListener;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +14,13 @@ import lombok.RequiredArgsConstructor;
 public class QuartzListenerConfig {
 
     private final Scheduler scheduler;
-    private final TestJobListener testJobListener;
+    private final JobListener jobListener;
+    private final SchedulerListener schedulerListener;
 
     @PostConstruct
     public void registerListeners() throws Exception {
-        scheduler.getListenerManager().addJobListener(testJobListener);
+        scheduler.getListenerManager().addJobListener(jobListener);
+        scheduler.getListenerManager().addSchedulerListener(schedulerListener);
     }
 
 }
