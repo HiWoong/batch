@@ -29,12 +29,6 @@ spring:
             tablePrefix: QRTZ_
             driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/yugabyte
-    username: yugabyte
-    password: yugabyte
-
   jpa:
     hibernate:
       ddl-auto: none

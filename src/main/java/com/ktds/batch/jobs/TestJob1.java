@@ -20,7 +20,7 @@ public class TestJob1 implements Job {
         log.info("[Job1] 실행 시간: {}", LocalDateTime.now());
         try {
             Thread.sleep(5000);
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             throw new JobExecutionException(e);
         }
     }

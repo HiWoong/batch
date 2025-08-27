@@ -10,6 +10,7 @@ public enum TriggerSttus {
     END("002", "BATCH_END"),
     ERROR("003", "BATCH_ERROR"),
     REJECT("004", "BATCH_REJECT"),
+    FAIL("005", "BATCH_FAIL"),
     ;
 
     private String code;
