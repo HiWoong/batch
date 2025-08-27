@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://172.17.0.1:5433/yugabyte
+    username: yugabyte
+    password: yugabyte

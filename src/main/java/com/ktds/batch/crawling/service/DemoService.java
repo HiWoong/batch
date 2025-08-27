@@ -85,7 +85,8 @@ public class DemoService {
         }
 
         // 파일 저장
-        String filePath = "C:/Work/test";
+        // TODO: path 변경
+        String filePath = "/home/user/crawl";
         String jsonFileNm = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "_openAPI.json";
 
         ObjectMapper mapper = new ObjectMapper();
