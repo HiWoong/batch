@@ -1,4 +1,4 @@
-package com.ktds.batch.util.enums;
+package com.ktds.batch.domain.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

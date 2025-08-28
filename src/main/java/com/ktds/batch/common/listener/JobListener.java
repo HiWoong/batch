@@ -6,9 +6,9 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 
-import com.ktds.batch.entity.BatchHistInfo;
+import com.ktds.batch.domain.entity.postgres.BatchHistInfo;
 import com.ktds.batch.service.BatchHistService;
-import com.ktds.batch.util.enums.TriggerSttus;
+import com.ktds.batch.domain.enums.TriggerSttus;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

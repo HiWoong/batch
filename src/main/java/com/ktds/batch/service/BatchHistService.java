@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.ktds.batch.entity.BatchHistInfo;
-import com.ktds.batch.repository.BatchHistRepository;
+import com.ktds.batch.domain.entity.postgres.BatchHistInfo;
+import com.ktds.batch.domain.repository.postgres.BatchHistRepository;
 
 import lombok.RequiredArgsConstructor;
 
