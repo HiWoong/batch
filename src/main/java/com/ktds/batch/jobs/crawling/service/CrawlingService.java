@@ -1,5 +1,6 @@
 package com.ktds.batch.jobs.crawling.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -13,6 +14,10 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -28,6 +33,9 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -161,6 +169,17 @@ public class CrawlingService {
         if (metaButtonElement.isPresent()) {
             ConcurrentHashMap<String, String> metaData = new ConcurrentHashMap<>();
 
+            // xml에서 라이선스 데이터 추출하기 위한 Parser 준비
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder;
+            try {
+                builder = factory.newDocumentBuilder();
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+
             List<WebElement> dropDownContents = driver.findElements(By.xpath("//div[@class='file-meta-table-pc']//div[@class='dropdown-content']//a"));
 
             for (WebElement dropDownContent : dropDownContents) {
@@ -189,6 +208,28 @@ public class CrawlingService {
 
                     System.out.println("xmlContent: " + xmlContent);
                     metaData.put("xmlContent", xmlContent);
+
+                    // xml에서 라이선스 내용 추출
+                    Document doc;
+                    String license = null;
+
+                    try {
+                        doc = builder.parse(new ByteArrayInputStream(xmlContent.getBytes("UTF-8")));
+                    } catch (SAXException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+
+                    // xml <dct:rights> 태그 내용 -> 라이선스 정보
+                    NodeList rightsList = doc.getElementsByTagName("dct:rights");
+                    if (rightsList.getLength() > 0) {
+                        license = rightsList.item(0).getTextContent();
+                    }
+
+                    metaData.put("license", license);
 
                     // 새 창 닫기
                     driver.close();
