@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.ktds.batch.domain.entity.postgres.BatchHistInfo;
-import com.ktds.batch.service.BatchHistService;
+import com.ktds.batch.batch.service.BatchHistService;
 import com.ktds.batch.domain.enums.TriggerSttus;
 
 @Component

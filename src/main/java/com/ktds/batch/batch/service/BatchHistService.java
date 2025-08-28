@@ -1,4 +1,4 @@
-package com.ktds.batch.service;
+package com.ktds.batch.batch.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

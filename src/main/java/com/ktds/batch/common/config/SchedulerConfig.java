@@ -14,7 +14,7 @@ import org.quartz.spi.JobFactory;
 import org.reflections.Reflections;
 
 import com.ktds.batch.domain.entity.yugabyte.BatchInfo;
-import com.ktds.batch.service.BatchService;
+import com.ktds.batch.batch.service.BatchService;
 
 import org.springframework.context.annotation.Configuration;
 
