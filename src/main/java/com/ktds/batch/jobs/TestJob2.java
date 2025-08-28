@@ -11,9 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.ktds.batch.crawling.service.DemoService;
-import com.ktds.batch.util.ScheduledCron;
 
-@ScheduledCron("0 */5 * * * ?")
 @Slf4j
 @DisallowConcurrentExecution
 @RequiredArgsConstructor
