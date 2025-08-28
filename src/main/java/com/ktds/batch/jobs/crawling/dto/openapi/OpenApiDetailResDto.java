@@ -1,19 +1,19 @@
-package com.ktds.batch.crawling.dto;
+package com.ktds.batch.jobs.crawling.dto.openapi;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 
-@ToString
+import com.ktds.batch.jobs.crawling.dto.CrawlingDetailRes;
+
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class CrawlingDetailResDto {
+public class OpenApiDetailResDto implements CrawlingDetailRes {
     private String apiNm;
     private String apiDesc;
 
@@ -21,5 +21,5 @@ public class CrawlingDetailResDto {
     private String uri;         // 요청 uri
     private String port;        // 도메인 포트
 
-    private CrawlingDetailInfoDto detailInfo;
+    private OpenApiDetailInfoDto detailInfo;
 }

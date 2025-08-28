@@ -10,20 +10,20 @@ import org.quartz.JobExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.ktds.batch.crawling.service.DemoService;
+import com.ktds.batch.jobs.crawling.service.CrawlingService;
 
 @Slf4j
 @DisallowConcurrentExecution
 @RequiredArgsConstructor
 public class TestJob2 implements Job {
 
-    private final DemoService demoService;
+    private final CrawlingService crawlingService;
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         log.info("[Job2] 실행 시간: {}", LocalDateTime.now());
         try {
-            demoService.getOpenAPIList();
+            crawlingService.getOpenAPIList();
         } catch (Exception e) {
             throw new JobExecutionException(e);
         }
