@@ -39,7 +39,7 @@ public class SchedulerConfig {
         Set<Class<? extends Job>> jobClasses = reflections.getSubTypesOf(Job.class);
 
         for (Class<? extends Job> jobClass : jobClasses) {
-            BatchInfo batchInfo = batchService.getBatchInfo(jobClass.getSimpleName());
+            BatchInfo batchInfo = batchService.getBatch(jobClass.getSimpleName());
 
             if (batchInfo != null) {
                 String cron = batchInfo.getCronExpression();
