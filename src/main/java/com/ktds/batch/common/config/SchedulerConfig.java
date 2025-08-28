@@ -10,36 +10,39 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.quartz.spi.JobFactory;
 import org.reflections.Reflections;
 
-import com.ktds.batch.entity.BatchInfo;
+import com.ktds.batch.domain.entity.yugabyte.BatchInfo;
 import com.ktds.batch.service.BatchService;
-import com.ktds.batch.util.ScheduledCron;
-import com.ktds.batch.util.enums.BatchSttus;
 
 import org.springframework.context.annotation.Configuration;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class SchedulerConfig {
 
     private final Scheduler scheduler;
+    private final JobFactory jobFactory;
     private final BatchService batchService;
 
     @PostConstruct
-    public void registerAnnotatedJobs() {
+    public void registerAnnotatedJobs() throws SchedulerException {
+        scheduler.setJobFactory(jobFactory);
 
         Reflections reflections = new Reflections("com.ktds.batch.jobs");
         Set<Class<? extends Job>> jobClasses = reflections.getSubTypesOf(Job.class);
 
         for (Class<? extends Job> jobClass : jobClasses) {
-            ScheduledCron annotation = jobClass.getAnnotation(ScheduledCron.class);
+            BatchInfo batchInfo = batchService.getBatchInfo(jobClass.getSimpleName());
 
-            if (annotation != null) {
-                String cron = annotation.value();
+            if (batchInfo != null) {
+                String cron = batchInfo.getCronExpression();
                 String jobName = jobClass.getSimpleName();
 
                 JobDetail jobDetail = JobBuilder.newJob(jobClass)
@@ -56,17 +59,7 @@ public class SchedulerConfig {
                 try {
                     if (!scheduler.checkExists(jobDetail.getKey())) {
                         scheduler.scheduleJob(jobDetail, trigger);
-
-                        BatchInfo batchInfo = new BatchInfo();
-                        batchInfo.setNm(jobName + "[Batch]")
-                            .setJobClassNm(jobName)
-                            .setTriggerNm(jobName + "[Trigger]")
-                            .setSttus(BatchSttus.AVAILABLE.getCode())
-                            .setCronExpression(cron)
-                            .setContent(jobName + "[Code]");
-                        batchService.registerBatch(batchInfo);
-
-                        System.out.printf(">>> Job 등록 완료: %s (%s)%n", jobName, cron);
+                        log.info(">>> Job 등록 완료: {} {}", jobName, cron);
                     }
                 } catch (SchedulerException e) {
                     e.printStackTrace();
