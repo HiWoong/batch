@@ -4,7 +4,7 @@ server:
 spring:
   config:
     activate:
-      on-profile: local
+      on-profile: tb
   main:
     web-application-type: servlet
   application:
@@ -24,8 +24,8 @@ spring:
             threadNamePrefix: QuartzScheduler
           jobStore:
             class: org.springframework.scheduling.quartz.LocalDataSourceJobStore # JobStoreCMT를 상속받는 Spring wrapper
-            #            class: org.quartz.impl.jdbcjobstore.JobStoreTX # 트랜잭션 제어 / 서버 환경 없이 애플리케이션 운영
-            #            class: org.quartz.impl.jdbcjobstore.JobStoreCMT # 애플리케이션 서버 내에서 애플리케이션 운영 / 컨테이너가 트랜잭션 관리
+#            class: org.quartz.impl.jdbcjobstore.JobStoreTX # 트랜잭션 제어 / 서버 환경 없이 애플리케이션 운영
+#            class: org.quartz.impl.jdbcjobstore.JobStoreCMT # 애플리케이션 서버 내에서 애플리케이션 운영 / 컨테이너가 트랜잭션 관리
             misfireThreshold: 6000 # 미스파이어 허용 오차(ms)
             isClustered: true
             # 테이블 prefix 변경
@@ -57,7 +57,7 @@ logging:
   config: classpath:logback-${spring.config.activate.on-profile}.xml
   file:
     name: batch
-    path: ./log/data
+    path: /data/log
     size: 10000 #10KB TRANSACTION log 사이즈
   level:
     root: INFO

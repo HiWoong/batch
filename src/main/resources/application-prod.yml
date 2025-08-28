@@ -4,7 +4,7 @@ server:
 spring:
   config:
     activate:
-      on-profile: local
+      on-profile: prod
   main:
     web-application-type: servlet
   application:
@@ -57,7 +57,7 @@ logging:
   config: classpath:logback-${spring.config.activate.on-profile}.xml
   file:
     name: batch
-    path: ./log/data
+    path: /data/log
     size: 10000 #10KB TRANSACTION log 사이즈
   level:
     root: INFO

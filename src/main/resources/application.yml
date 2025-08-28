@@ -2,6 +2,9 @@ server:
   port: 8080
 
 spring:
+  config:
+    activate:
+      on-profile: default
   main:
     web-application-type: servlet
   application:
@@ -29,6 +32,18 @@ spring:
             tablePrefix: QRTZ_
             driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 
+  datasource:
+    yugabyte:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5433/yugabyte
+      username: yugabyte
+      password: yugabyte
+    postgres:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/postgres
+      username: postgres
+      password: postgres
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -37,3 +52,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+logging:
+  #config: classpath:logback-${spring.config.activate.on-profile}.xml
+  file:
+    name: batch
+    path: /data/log
+    size: 10000 #10KB TRANSACTION log 사이즈
+  level:
+    root: INFO

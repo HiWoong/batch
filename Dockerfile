@@ -25,7 +25,7 @@ RUN wget -q https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.
     && rm -rf chromedriver-linux64 chromedriver-linux64.zip
 
 # 3. 실행
-ENTRYPOINT ["java", "-jar", "/app.jar", "--spring.profiles.active=docker"]
+ENTRYPOINT ["java", "-jar", "/app.jar", "--spring.profiles.active=dev"]
 
 # (선택) 컨테이너 포트 지정
 EXPOSE 8080

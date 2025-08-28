@@ -4,7 +4,7 @@ server:
 spring:
   config:
     activate:
-      on-profile: local
+      on-profile: dev
   main:
     web-application-type: servlet
   application:
@@ -35,12 +35,12 @@ spring:
   datasource:
     yugabyte:
       driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5433/yugabyte
+      url: jdbc:postgresql://172.17.0.1:5433/yugabyte
       username: yugabyte
       password: yugabyte
     postgres:
       driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5432/postgres
+      url: jdbc:postgresql://172.17.0.1:5432/postgres
       username: postgres
       password: postgres
 
@@ -57,7 +57,7 @@ logging:
   config: classpath:logback-${spring.config.activate.on-profile}.xml
   file:
     name: batch
-    path: ./log/data
+    path: /data/log
     size: 10000 #10KB TRANSACTION log 사이즈
   level:
     root: INFO
