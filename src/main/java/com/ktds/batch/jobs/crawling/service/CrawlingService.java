@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.ktds.batch.jobs.crawling.dto.CrawlingDetailRes;
 import com.ktds.batch.jobs.crawling.dto.openapi.OpenApiDetailInfoDto;
@@ -50,6 +51,7 @@ import com.ktds.batch.jobs.crawling.dto.CrawlingResDto;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CrawlingService {
 
     @Value("${crawling.open-api.base-url}")
@@ -81,7 +83,7 @@ public class CrawlingService {
 
             for (WebElement api : apiList) {
                 String url = api.getDomProperty("href");
-                System.out.println("href : " + url);
+                log.info("href : {}", url);
 
                 apiUrlList.add(url);
             }
@@ -138,15 +140,15 @@ public class CrawlingService {
             resDto.setDataType("OTHER");
         }
 
-        System.out.println("//////////////////////////////TITLE////////////////////////////////////////");
+        log.info("//////////////////////////////TITLE////////////////////////////////////////");
         List<WebElement> titleElements = driver.findElements(By.cssSelector("p.tit.open-api-title"));
         if (!titleElements.isEmpty()) {
-            System.out.println(titleElements.get(0).getText().trim());
+            log.info(titleElements.get(0).getText().trim());
             // API 제목 세팅
             resDto.setTitle(titleElements.get(0).getText().trim());
         }
 
-        System.out.println("//////////////////////////////CONT 내용////////////////////////////////////////");
+        log.info("//////////////////////////////CONT 내용////////////////////////////////////////");
         List<WebElement> contElements = driver.findElements(By.cssSelector("div.cont"));
         if (!contElements.isEmpty()) {
             List<WebElement> spans = contElements.get(0).findElements(By.cssSelector("span"));
@@ -156,13 +158,13 @@ public class CrawlingService {
                     JavascriptExecutor js = (JavascriptExecutor) driver;
                     contText = ((String) js.executeScript("return arguments[0].innerText;", spans.get(0))).trim();
                 }
-                System.out.println(contText);
+                log.info(contText);
                 // API 설명 세팅
                 resDto.setDesc(contText);
             }
         }
 
-        System.out.println("//////////////////////////////메타 데이터////////////////////////////////////////");
+        log.info("//////////////////////////////메타 데이터////////////////////////////////////////");
         Optional<WebElement> metaButtonElement = driver.findElements(By.cssSelector("button.h36.dropbtn"))
             .stream().findFirst();
 
@@ -186,7 +188,7 @@ public class CrawlingService {
                 String metaDataText = dropDownContent.getDomProperty("textContent");
                 String metaDataUrl = dropDownContent.getDomProperty("href");
 
-                System.out.println(metaDataText + ": " + metaDataUrl);
+                log.info("{}: {}", metaDataText, metaDataUrl);
 
                 metaData.put(metaDataText, metaDataUrl);
 
@@ -206,7 +208,7 @@ public class CrawlingService {
                     WebElement preTag = driver.findElement(By.cssSelector("div#folder0"));
                     String xmlContent = preTag.getText().trim();
 
-                    System.out.println("xmlContent: " + xmlContent);
+                    log.info("xmlContent: {}", xmlContent);
                     metaData.put("xmlContent", xmlContent);
 
                     // xml에서 라이선스 내용 추출
@@ -243,7 +245,7 @@ public class CrawlingService {
             resDto.setMetaData(metaData);
         }
 
-        System.out.println("//////////////////////////////OPEN API 상세정보////////////////////////////////////////");
+        log.info("//////////////////////////////OPEN API 상세정보////////////////////////////////////////");
         // dataset-table 클래스를 가진 테이블만 선택
         List<WebElement> tables = driver.findElements(
             By.xpath("//div[(contains(@style,'display:block') or contains(@style,'display: block'))]//table[contains(@class,'dataset-table')]")
@@ -286,7 +288,7 @@ public class CrawlingService {
                         }
                     }
 
-                    System.out.println("Key: " + key + ", value: " + value);
+                    log.info("Key: {}, value: {}", key, value);
 
                     // OpenAPI 정보 Map에 쌓기
                     dataMap.put(key, value);
@@ -305,7 +307,7 @@ public class CrawlingService {
 
         // 상세기능인 경우
         if (!openAPIDetail.isEmpty() && apiSwagger.isEmpty()) {
-            System.out.println("//////////////////////////////상세기능////////////////////////////////////////");
+            log.info("//////////////////////////////상세기능////////////////////////////////////////");
 
             try {
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(90));
@@ -324,7 +326,7 @@ public class CrawlingService {
                     String value = optionsList.get(i).getDomAttribute("value");
                     String optionText = optionsList.get(i).getText().trim();
 
-                    System.out.println("상세기능 목록: " + optionText + ", value: " + value);
+                    log.info("상세기능 목록: {}, value: {}", optionText, value);
 
                     // API명 세팅
                     detailResDto.setApiNm(optionText);
@@ -349,7 +351,7 @@ public class CrawlingService {
                     });
 
                     // API 설명
-                    System.out.println("Changed Title: " + updatedElement.getText().trim());
+                    log.info("Changed Title: {}", updatedElement.getText().trim());
                     // API 설명 세팅
                     detailResDto.setApiDesc(updatedElement.getText().trim());
 
@@ -383,7 +385,7 @@ public class CrawlingService {
                         // 상세기능 내용 Map에 데이터 쌓기
                         detailInfoMap.put(infoKey, infoValue);
 
-                        System.out.println("infoKey: " + infoKey + ", infoValue: " + infoValue);
+                        log.info("infoKey: {}, infoValue: {}", infoKey, infoValue);
 
                         // 엔드포인트, URI, 포트 작업
                         if (infoKey.contains("서비스URL")) {
@@ -418,7 +420,7 @@ public class CrawlingService {
                     // 출력 파라미터 세팅
                     detailInfoDto.setResponseParam(parseParamTable(tableDivs.get(1)));
 
-                    System.out.println("//////////////////////////////샘플코드////////////////////////////////////////");
+                    log.info("//////////////////////////////샘플코드////////////////////////////////////////");
                     // 샘플코드 Map 생성
                     ConcurrentHashMap<String, String> sampleCodeMap = new ConcurrentHashMap<>();
 
@@ -453,8 +455,8 @@ public class CrawlingService {
 
                             codeArea = driver.findElement(By.cssSelector("#sampleCodeArea"));
                             String codeText = getInnerText(driver, codeArea).trim();
-                            System.out.println("[샘플코드 - " + languageLabel + "]");
-                            System.out.println(codeText);
+                            log.info("[샘플코드 - {}]", languageLabel);
+                            log.info(codeText);
 
                             // 샘플코드 Map에 데이터 쌓기
                             sampleCodeMap.put(languageLabel, codeText);
@@ -517,15 +519,15 @@ public class CrawlingService {
                 String endpoint = (lastSlash > 0) ? path.substring(0, lastSlash) : "";
                 String uri = (lastSlash > 0) ? path.substring(lastSlash) : path;
 
-                System.out.println("apiName: " + apiName);
-                System.out.println("apiVersion: " + apiVersion);
-                System.out.println("apiBaseUrl: " + apiBaseUrl);
-                System.out.println("port: " + port);
-                System.out.println("endpoint: " + protocol + "://" + domain + endpoint);
-                System.out.println("uri: " + uri);
+                log.info("apiName: {}", apiName);
+                log.info("apiVersion: {}", apiVersion);
+                log.info("apiBaseUrl: {}", apiBaseUrl);
+                log.info("port: {}", port);
+                log.info("endpoint: {}://{}{}", protocol, domain, endpoint);
+                log.info("uri: " + uri);
 
                 WebElement apiDescription = swaggerInfo.findElement(By.cssSelector("div.markdown"));
-                System.out.println("apiDescription: " + apiDescription.getText().trim());
+                log.info("apiDescription: {}", apiDescription.getText().trim());
 
                 // API명, API 설명, 엔드포인트, URI, 포트 세팅
                 detailResDto.setApiNm(apiName);
@@ -535,12 +537,12 @@ public class CrawlingService {
                 detailResDto.setPort(Integer.toString(port));
 
             } catch (MalformedURLException e) {
-                System.out.println("URL 파싱 실패: " + e.getMessage());
+                log.info("URL 파싱 실패: {}", e.getMessage());
             } catch (Exception e) {
-                System.out.println("예상치 못한 오류 발생: " + e.getMessage());
+                log.info("예상치 못한 오류 발생: {}", e.getMessage());
             }
 
-            System.out.println("//////////////////////////////SWAGGER 정보////////////////////////////////////////");
+            log.info("//////////////////////////////SWAGGER 정보////////////////////////////////////////");
             String swaggerUrl = null;
             String swaggerJson = null;
 
@@ -583,13 +585,13 @@ public class CrawlingService {
             ConcurrentHashMap<String, String> swaggerInfo = new ConcurrentHashMap<>();
 
             if (swaggerUrl != null && !swaggerUrl.isEmpty()) {
-                System.out.println("swaggerUrl: " + swaggerUrl);
+                log.info("swaggerUrl: {}", swaggerUrl);
 
                 // swaggerUrl Map에 쌓기
                 swaggerInfo.put("swaggerUrl", swaggerUrl);
             }
             if (swaggerJson != null && !swaggerJson.isEmpty()) {
-                System.out.println("swaggerJson: " + swaggerJson);
+                log.info("swaggerJson: {}", swaggerJson);
 
                 // swaggerJson Map에 쌓기
                 swaggerInfo.put("swaggerJson", swaggerJson);

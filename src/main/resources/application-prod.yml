@@ -61,3 +61,8 @@ logging:
     size: 10000 #10KB TRANSACTION log 사이즈
   level:
     root: INFO
+
+crawling:
+  open-api:
+    base-url: https://www.data.go.kr/tcs/dss/selectDataSetList.do?dType=API&keyword=&operator=&detailKeyword=&publicDataPk=&recmSe=&detailText=&relatedKeyword=&commaNotInData=&commaAndData=&commaOrData=&must_not=&tabId=&dataSetCoreTf=&coreDataNm=&sort=updtDt&relRadio=&orgFullName=&orgFilter=&org=&orgSearch=&currentPage=10&perPage=10&brm=&instt=&svcType=&kwrdArray=&extsn=&coreDataNmArray=&pblonsipScopeCode=
+    file-path: /home/user/crawl
