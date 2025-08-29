@@ -1,5 +1,6 @@
-package com.ktds.batch.crawling.service;
+package com.ktds.batch.jobs.crawling.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -14,6 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -26,24 +31,32 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import lombok.RequiredArgsConstructor;
 
-import com.ktds.batch.crawling.dto.CrawlingDetailInfoDto;
-import com.ktds.batch.crawling.dto.CrawlingDetailResDto;
-import com.ktds.batch.crawling.dto.CrawlingParamDto;
-import com.ktds.batch.crawling.dto.CrawlingResDto;
+import com.ktds.batch.jobs.crawling.dto.CrawlingDetailRes;
+import com.ktds.batch.jobs.crawling.dto.openapi.OpenApiDetailInfoDto;
+import com.ktds.batch.jobs.crawling.dto.openapi.OpenApiDetailResDto;
+import com.ktds.batch.jobs.crawling.dto.openapi.OpenApiParamDto;
+import com.ktds.batch.jobs.crawling.dto.CrawlingResDto;
 
 @Service
 @RequiredArgsConstructor
-public class DemoService {
-    public String getHello() {
-        return "hello-World";
-    }
+public class CrawlingService {
+
+    @Value("${crawling.open-api.base-url}")
+    private String openApiUrl;
+
+    @Value("${crawling.open-api.file-path}")
+    private String openApiFilePath;
 
     /**
      * OPEN API 리스트 페이지 크롤링 후 상세 크롤링 작업
@@ -53,13 +66,11 @@ public class DemoService {
         List<String> apiUrlList = new ArrayList<>();
         List<CrawlingResDto> crawlingList = new ArrayList<>();
 
-        String mainPage = "https://www.data.go.kr/tcs/dss/selectDataSetList.do?dType=API&keyword=&operator=&detailKeyword=&publicDataPk=&recmSe=&detailText=&relatedKeyword=&commaNotInData=&commaAndData=&commaOrData=&must_not=&tabId=&dataSetCoreTf=&coreDataNm=&sort=updtDt&relRadio=&orgFullName=&orgFilter=&org=&orgSearch=&currentPage=10&perPage=10&brm=&instt=&svcType=&kwrdArray=&extsn=&coreDataNmArray=&pblonsipScopeCode=";
-
         // 크롬 옵션 세팅
         ChromeOptions options = this.setChromeOptions();
 
         WebDriver driver = new ChromeDriver(options);       // WebDriver 객체 생성
-        driver.get(mainPage);
+        driver.get(openApiUrl);
 
         Optional<WebElement> apiElement = driver.findElements(By.cssSelector("div.result-list"))
             .stream().findFirst();
@@ -85,14 +96,12 @@ public class DemoService {
         }
 
         // 파일 저장
-        // TODO: path 변경
-        String filePath = "/home/user/crawl";
         String jsonFileNm = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "_openAPI.json";
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-        File jsonFile = new File(filePath, jsonFileNm);
+        File jsonFile = new File(openApiFilePath, jsonFileNm);
         jsonFile.getParentFile().mkdirs();
 
         try {
@@ -160,6 +169,17 @@ public class DemoService {
         if (metaButtonElement.isPresent()) {
             ConcurrentHashMap<String, String> metaData = new ConcurrentHashMap<>();
 
+            // xml에서 라이선스 데이터 추출하기 위한 Parser 준비
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder;
+            try {
+                builder = factory.newDocumentBuilder();
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+
             List<WebElement> dropDownContents = driver.findElements(By.xpath("//div[@class='file-meta-table-pc']//div[@class='dropdown-content']//a"));
 
             for (WebElement dropDownContent : dropDownContents) {
@@ -169,6 +189,54 @@ public class DemoService {
                 System.out.println(metaDataText + ": " + metaDataUrl);
 
                 metaData.put(metaDataText, metaDataUrl);
+
+                // DCAT 텍스트 크롤링
+                if (metaDataText.contains("DCAT")) {
+                    // 현재 창 핸들 저장
+                    String mainWindow = driver.getWindowHandle();
+
+                    // 새 창 열기
+                    ((JavascriptExecutor) driver).executeScript("window.open(arguments[0], '_blank');", metaDataUrl);
+
+                    // 새 창 핸들 가져오기
+                    List<String> windows = new ArrayList<>(driver.getWindowHandles());
+                    driver.switchTo().window(windows.get(windows.size() - 1));
+
+                    // XML 추출
+                    WebElement preTag = driver.findElement(By.cssSelector("div#folder0"));
+                    String xmlContent = preTag.getText().trim();
+
+                    System.out.println("xmlContent: " + xmlContent);
+                    metaData.put("xmlContent", xmlContent);
+
+                    // xml에서 라이선스 내용 추출
+                    Document doc;
+                    String license = null;
+
+                    try {
+                        doc = builder.parse(new ByteArrayInputStream(xmlContent.getBytes("UTF-8")));
+                    } catch (SAXException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+
+                    // xml <dct:rights> 태그 내용 -> 라이선스 정보
+                    NodeList rightsList = doc.getElementsByTagName("dct:rights");
+                    if (rightsList.getLength() > 0) {
+                        license = rightsList.item(0).getTextContent();
+                    }
+
+                    metaData.put("license", license);
+
+                    // 새 창 닫기
+                    driver.close();
+
+                    // 원래 창으로 돌아가기
+                    driver.switchTo().window(mainWindow);
+                }
             }
 
             // 메타데이터 세팅
@@ -226,14 +294,14 @@ public class DemoService {
             }
         }
         // CrawlingResDto > openAPIInfo 세팅
-        resDto.setOpenAPIInfo(dataMap);
+        resDto.setDatasetInfo(dataMap);
 
         // 상세기능 or Swagger 형식 구분
         List<WebElement> openAPIDetail = driver.findElements(By.cssSelector("div.open-api-detail"));
         List<WebElement> apiSwagger = driver.findElements(By.cssSelector("div#api-swagger"));
 
         // CrawlingDetailResDto 리스트 생성
-        List<CrawlingDetailResDto> detailResDtoList = new ArrayList<>();
+        List<CrawlingDetailRes> detailResDtoList = new ArrayList<>();
 
         // 상세기능인 경우
         if (!openAPIDetail.isEmpty() && apiSwagger.isEmpty()) {
@@ -250,8 +318,8 @@ public class DemoService {
                 // 상세기능 목록 하나씩 조회
                 for (int i = 0; i < optionsList.size(); i++) {
                     // 상세내용 DTO 생성
-                    CrawlingDetailResDto detailResDto = CrawlingDetailResDto.builder().build();
-                    CrawlingDetailInfoDto detailInfoDto = CrawlingDetailInfoDto.builder().build();
+                    OpenApiDetailResDto detailResDto = OpenApiDetailResDto.builder().build();
+                    OpenApiDetailInfoDto detailInfoDto = OpenApiDetailInfoDto.builder().build();
 
                     String value = optionsList.get(i).getDomAttribute("value");
                     String optionText = optionsList.get(i).getText().trim();
@@ -410,8 +478,8 @@ public class DemoService {
 
         } else if (openAPIDetail.isEmpty() && !apiSwagger.isEmpty()) {
             // swagger인 경우
-            CrawlingDetailResDto detailResDto = CrawlingDetailResDto.builder().build();
-            CrawlingDetailInfoDto detailInfoDto = CrawlingDetailInfoDto.builder().build();
+            OpenApiDetailResDto detailResDto = OpenApiDetailResDto.builder().build();
+            OpenApiDetailInfoDto detailInfoDto = OpenApiDetailInfoDto.builder().build();
 
             try {
                 WebElement swaggerElement = driver.findElement(By.cssSelector("div#api-swagger"));
@@ -574,8 +642,8 @@ public class DemoService {
      * @param tableDiv
      * @return
      */
-    private List<CrawlingParamDto> parseParamTable(WebElement tableDiv) {
-        List<CrawlingParamDto> paramList = new ArrayList<>();
+    private List<OpenApiParamDto> parseParamTable(WebElement tableDiv) {
+        List<OpenApiParamDto> paramList = new ArrayList<>();
 
         WebElement tbody = tableDiv.findElement(By.cssSelector("tbody"));
         List<WebElement> rows = tbody.findElements(By.tagName("tr"));
@@ -583,7 +651,7 @@ public class DemoService {
         for (WebElement row : rows) {
             List<WebElement> cols = row.findElements(By.tagName("td"));
 
-            CrawlingParamDto dto = CrawlingParamDto.builder()
+            OpenApiParamDto dto = OpenApiParamDto.builder()
                 .korNm(cols.get(0).getText().trim())
                 .engNm(cols.get(1).getText().trim())
                 .paramSize(cols.get(2).getText().trim())
