@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9010
 
 spring:
   config:
@@ -53,8 +53,9 @@ spring:
       hibernate:
         format_sql: true
 
+#TODO : 추후 logback 추가
 logging:
-  config: classpath:logback-${spring.config.activate.on-profile}.xml
+  #config: classpath:logback-${spring.config.activate.on-profile}.xml
   file:
     name: batch
     path: ./log/data

@@ -35,14 +35,14 @@ spring:
   datasource:
     yugabyte:
       driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5433/yugabyte
-      username: yugabyte
-      password: yugabyte
+      url: ${SPRING_DATASOURCE_YUGABYTE_URL}
+      username: ${SPRING_DATASOURCE_YUGABYTE_USERNAME}
+      password: ${SPRING_DATASOURCE_YUGABYTE_PASSWORD}
     postgres:
       driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5432/postgres
-      username: postgres
-      password: postgres
+      url: ${SPRING_DATASOURCE_POSTGRES_URL}
+      username: ${SPRING_DATASOURCE_POSTGRES_USERNAME}
+      password: ${SPRING_DATASOURCE_POSTGRES_PASSWORD}
 
   jpa:
     hibernate:

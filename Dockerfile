@@ -1,5 +1,5 @@
 # 1. JDK 기반 이미지 선택
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 
 # 2. 빌드 결과물 JAR 복사
 COPY build/libs/batch-0.0.1-SNAPSHOT.jar app.jar
